@@ -23,7 +23,7 @@ jobs:
           # healthcheck: https://peaceful-tundra-92928.herokuapp.com/health
           # checkstring: "health ok"
           # rollbackonhealthcheckfailed: true
-tag_release:  
+  tag_release:  
     if: ${{ github.event_name == 'push' && !contains(join(toJSon(github.event.commits.*.message)), 'skip') }}
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-20.04
