@@ -1,0 +1,37 @@
+name: Deployment pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize]
+
+jobs:
+  simple_deployment_pipeline:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: heroku deploy
+        uses: akhileshns/heroku-deploy@v3.12.12
+        if: ${{ github.event_name == 'push' }}
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: peaceful-tundra-92928
+          heroku_email: pitossomo@gmail.com
+          # healthcheck: https://peaceful-tundra-92928.herokuapp.com/health
+          # checkstring: "health ok"
+          # rollbackonhealthcheckfailed: true
+tag_release:  
+    if: ${{ github.event_name == 'push' && !contains(join(toJSon(github.event.commits.*.message)), 'skip') }}
+    needs: [simple_deployment_pipeline]
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.36.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: patch
